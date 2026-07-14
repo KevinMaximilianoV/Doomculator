@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android blocks plain HTTP by default on API 28+. doomWadUrl in
+     MainActivity currently points at an http:// (not https://) mirror, so
+     this allows cleartext traffic for just that host instead of the whole
+     app — narrower than android:usesCleartextTraffic="true". If you change
+     doomWadUrl to an https:// link, this file (and the manifest reference
+     to it) can be removed. -->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">distro.ibiblio.org</domain>
+    </domain-config>
+</network-security-config>

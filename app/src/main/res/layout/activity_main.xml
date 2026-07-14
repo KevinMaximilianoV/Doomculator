@@ -1,0 +1,593 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/calc_background"
+    tools:context=".MainActivity">
+
+    <!-- ── Display / DOOM area (30 % of screen) ──────────────────────────── -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="3"
+        android:background="@color/calc_background">
+
+        <!-- Calculator display (shown in calc mode) -->
+        <LinearLayout
+            android:id="@+id/calcDisplay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="bottom|end"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="8dp">
+
+            <TextView
+                android:id="@+id/tvExpression"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:gravity="end|bottom"
+                android:textColor="@color/calc_expression_text"
+                android:textSize="18sp"
+                android:maxLines="1"
+                android:ellipsize="start"
+                tools:text="sin(45°)" />
+
+            <TextView
+                android:id="@+id/tvDisplay"
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:gravity="end|bottom"
+                android:textColor="@color/calc_display_text"
+                android:maxLines="1"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="20sp"
+                app:autoSizeMaxTextSize="60sp"
+                tools:text="0" />
+        </LinearLayout>
+
+        <!-- DOOM framebuffer (shown in doom mode, fills the display area) -->
+        <com.example.calculadorachida.DoomSurfaceView
+            android:id="@+id/doomSurface"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone" />
+
+    </FrameLayout>
+
+    <!-- ── Buttons (70 % of screen — 7 equal rows) ───────────────────────── -->
+    <!-- Wrapped in a FrameLayout so the toggle button can float in its
+         top-right corner without ever overlapping doomSurface's rectangle
+         above — that SurfaceView is forced on top of the window (see
+         DoomSurfaceView's setZOrderOnTop) so any view sharing its bounds
+         gets visually hidden behind the game frame even though it stays
+         clickable; placing the button outside those bounds avoids that. -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="7">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:paddingBottom="8dp"
+        android:paddingTop="42dp">
+
+        <!-- Scientific row 1: sin  cos  tan  xⁿ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSin"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_margin="4dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:onClick="onButtonClick"
+                android:text="sin"
+                android:textSize="16sp"
+                android:textColor="@color/calc_btn_text_light"
+                app:backgroundTint="@color/calc_btn_scientific"
+                app:cornerRadius="12dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnCos"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_margin="4dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:onClick="onButtonClick"
+                android:text="cos"
+                android:textSize="16sp"
+                android:textColor="@color/calc_btn_text_light"
+                app:backgroundTint="@color/calc_btn_scientific"
+                app:cornerRadius="12dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnTan"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_margin="4dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:onClick="onButtonClick"
+                android:text="tan"
+                android:textSize="16sp"
+                android:textColor="@color/calc_btn_text_light"
+                app:backgroundTint="@color/calc_btn_scientific"
+                app:cornerRadius="12dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnPower"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_margin="4dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:onClick="onButtonClick"
+                android:text="xⁿ"
+                android:textSize="18sp"
+                android:textColor="@color/calc_btn_text_light"
+                app:backgroundTint="@color/calc_btn_scientific"
+                app:cornerRadius="12dp" />
+        </LinearLayout>
+
+        <!-- Scientific row 2: √  x²  (  ) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSqrt"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_margin="4dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:onClick="onButtonClick"
+                android:text="√"
+                android:textSize="22sp"
+                android:textColor="@color/calc_btn_text_light"
+                app:backgroundTint="@color/calc_btn_scientific"
+                app:cornerRadius="12dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSquare"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_margin="4dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:onClick="onButtonClick"
+                android:text="x²"
+                android:textSize="18sp"
+                android:textColor="@color/calc_btn_text_light"
+                app:backgroundTint="@color/calc_btn_scientific"
+                app:cornerRadius="12dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnOpenParen"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_margin="4dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:onClick="onButtonClick"
+                android:text="("
+                android:textSize="22sp"
+                android:textColor="@color/calc_btn_text_light"
+                app:backgroundTint="@color/calc_btn_scientific"
+                app:cornerRadius="12dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnCloseParen"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_margin="4dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:onClick="onButtonClick"
+                android:text=")"
+                android:textSize="22sp"
+                android:textColor="@color/calc_btn_text_light"
+                app:backgroundTint="@color/calc_btn_scientific"
+                app:cornerRadius="12dp" />
+        </LinearLayout>
+
+        <!-- Row 1: C  ±  %  ÷ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnClear"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_margin="4dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:onClick="onButtonClick"
+                android:text="C"
+                android:textSize="22sp"
+                android:textColor="@color/calc_btn_text_dark"
+                app:backgroundTint="@color/calc_btn_function"
+                app:cornerRadius="16dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnToggleSign"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_margin="4dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:onClick="onButtonClick"
+                android:text="±"
+                android:textSize="22sp"
+                android:textColor="@color/calc_btn_text_dark"
+                app:backgroundTint="@color/calc_btn_function"
+                app:cornerRadius="16dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnPercent"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_margin="4dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:onClick="onButtonClick"
+                android:text="%"
+                android:textSize="22sp"
+                android:textColor="@color/calc_btn_text_dark"
+                app:backgroundTint="@color/calc_btn_function"
+                app:cornerRadius="16dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnDivide"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_margin="4dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:onClick="onButtonClick"
+                android:text="÷"
+                android:textSize="26sp"
+                android:textColor="@color/calc_btn_text_light"
+                app:backgroundTint="@color/calc_btn_operator"
+                app:cornerRadius="16dp" />
+        </LinearLayout>
+
+        <!-- Row 2: 7  8  9  × -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn7"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_margin="4dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:onClick="onButtonClick"
+                android:text="7"
+                android:textSize="24sp"
+                android:textColor="@color/calc_btn_text_light"
+                app:backgroundTint="@color/calc_btn_number"
+                app:cornerRadius="16dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn8"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_margin="4dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:onClick="onButtonClick"
+                android:text="8"
+                android:textSize="24sp"
+                android:textColor="@color/calc_btn_text_light"
+                app:backgroundTint="@color/calc_btn_number"
+                app:cornerRadius="16dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn9"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_margin="4dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:onClick="onButtonClick"
+                android:text="9"
+                android:textSize="24sp"
+                android:textColor="@color/calc_btn_text_light"
+                app:backgroundTint="@color/calc_btn_number"
+                app:cornerRadius="16dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnMultiply"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_margin="4dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:onClick="onButtonClick"
+                android:text="×"
+                android:textSize="26sp"
+                android:textColor="@color/calc_btn_text_light"
+                app:backgroundTint="@color/calc_btn_operator"
+                app:cornerRadius="16dp" />
+        </LinearLayout>
+
+        <!-- Row 3: 4  5  6  − -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn4"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_margin="4dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:onClick="onButtonClick"
+                android:text="4"
+                android:textSize="24sp"
+                android:textColor="@color/calc_btn_text_light"
+                app:backgroundTint="@color/calc_btn_number"
+                app:cornerRadius="16dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn5"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_margin="4dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:onClick="onButtonClick"
+                android:text="5"
+                android:textSize="24sp"
+                android:textColor="@color/calc_btn_text_light"
+                app:backgroundTint="@color/calc_btn_number"
+                app:cornerRadius="16dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn6"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_margin="4dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:onClick="onButtonClick"
+                android:text="6"
+                android:textSize="24sp"
+                android:textColor="@color/calc_btn_text_light"
+                app:backgroundTint="@color/calc_btn_number"
+                app:cornerRadius="16dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSubtract"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_margin="4dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:onClick="onButtonClick"
+                android:text="−"
+                android:textSize="26sp"
+                android:textColor="@color/calc_btn_text_light"
+                app:backgroundTint="@color/calc_btn_operator"
+                app:cornerRadius="16dp" />
+        </LinearLayout>
+
+        <!-- Row 4: 1  2  3  + -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn1"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_margin="4dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:onClick="onButtonClick"
+                android:text="1"
+                android:textSize="24sp"
+                android:textColor="@color/calc_btn_text_light"
+                app:backgroundTint="@color/calc_btn_number"
+                app:cornerRadius="16dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn2"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_margin="4dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:onClick="onButtonClick"
+                android:text="2"
+                android:textSize="24sp"
+                android:textColor="@color/calc_btn_text_light"
+                app:backgroundTint="@color/calc_btn_number"
+                app:cornerRadius="16dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn3"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_margin="4dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:onClick="onButtonClick"
+                android:text="3"
+                android:textSize="24sp"
+                android:textColor="@color/calc_btn_text_light"
+                app:backgroundTint="@color/calc_btn_number"
+                app:cornerRadius="16dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAdd"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_margin="4dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:onClick="onButtonClick"
+                android:text="+"
+                android:textSize="26sp"
+                android:textColor="@color/calc_btn_text_light"
+                app:backgroundTint="@color/calc_btn_operator"
+                app:cornerRadius="16dp" />
+        </LinearLayout>
+
+        <!-- Row 5: 0 (wide)  .  = -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn0"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="2"
+                android:layout_margin="4dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:onClick="onButtonClick"
+                android:text="0"
+                android:textSize="24sp"
+                android:textColor="@color/calc_btn_text_light"
+                app:backgroundTint="@color/calc_btn_number"
+                app:cornerRadius="16dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnDecimal"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_margin="4dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:onClick="onButtonClick"
+                android:text="."
+                android:textSize="26sp"
+                android:textColor="@color/calc_btn_text_light"
+                app:backgroundTint="@color/calc_btn_number"
+                app:cornerRadius="16dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnEquals"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_margin="4dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:onClick="onButtonClick"
+                android:text="="
+                android:textSize="26sp"
+                android:textColor="@color/calc_btn_text_light"
+                app:backgroundTint="@color/calc_btn_operator"
+                app:cornerRadius="16dp" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+        <!-- Mode toggle chip — always visible, top-right corner of the
+             buttons area (kept clear of doomSurface's bounds, see above) -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnDoomToggle"
+            style="@style/Widget.Material3.Button"
+            android:layout_width="wrap_content"
+            android:layout_height="28dp"
+            android:layout_gravity="top|end"
+            android:layout_margin="6dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:onClick="onButtonClick"
+            android:text="DOOM"
+            android:textSize="9sp"
+            android:letterSpacing="0.1"
+            app:backgroundTint="#8B0000"
+            app:cornerRadius="6dp" />
+
+    </FrameLayout>
+</LinearLayout>
